@@ -1,3 +1,4 @@
+import { UseCasesData } from './hooks/UseCasesData'
 import { UseOrdersData } from './hooks/UseOrdersData'
 import { UseVaccinationsData } from './hooks/UseVaccinationsData'
 import InformationalText from './pages/InformationalText'
@@ -6,14 +7,14 @@ import VaccinationsWithOverlay from './pages/VaccinationsWithOverlay'
 const App = () => {
   const vaccinationsData = UseVaccinationsData()
   const ordersData = UseOrdersData()
-
-  //Null check for data hooks
+  const casesData = UseCasesData()
 
   return (
     <div className='App'>
       <VaccinationsWithOverlay
         vaccinationsData={vaccinationsData}
         ordersData={ordersData}
+        casesData={casesData}
       />
       <InformationalText
         vaccinationsData={vaccinationsData}

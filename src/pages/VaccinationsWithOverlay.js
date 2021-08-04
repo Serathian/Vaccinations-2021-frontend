@@ -14,11 +14,17 @@ const margin = { top: 20, right: 20, bottom: 45, left: 50 }
 const innerHeight = height - margin.top - margin.bottom
 const innerWidth = width - margin.left - margin.right
 
-const VaccinationsWithOverlay = ({ vaccinationsData, ordersData }) => {
+const VaccinationsWithOverlay = ({
+  vaccinationsData,
+  ordersData,
+  casesData,
+}) => {
   //Null check for data hooks
-  if (!vaccinationsData || !ordersData) {
+  if (!vaccinationsData || !ordersData || !casesData) {
     return <pre>Loading...</pre>
   }
+
+  console.log(casesData)
 
   const maxValue = new Date(d3.max(vaccinationsData, (d) => d.vaccinationDate))
   const minValue = new Date(d3.min(vaccinationsData, (d) => d.vaccinationDate))
