@@ -1,18 +1,6 @@
-import { useEffect, useState } from 'react'
 import { UseOrdersData } from './hooks/UseOrdersData'
 import { UseVaccinationsData } from './hooks/UseVaccinationsData'
-import * as d3 from 'd3'
-import _ from 'lodash'
-import { AxisBottom } from './components/AxisBottom'
-import { AxisLeft } from './components/AxisLeft'
-import { Marks } from './components/Marks'
-
-//Need to get the covid cases data, from minValue and maxValue?
-//Overlay it with a line graph on top of the bars
-
-const width = 960
-const height = 500
-const margin = { top: 20, right: 20, bottom: 45, left: 50 }
+import VaccinationsWithOverlay from './pages/VaccinationsWithOverlay'
 
 const App = () => {
   const vaccinationsData = UseVaccinationsData()
@@ -22,47 +10,6 @@ const App = () => {
   if (!vaccinationsData || !ordersData) {
     return <pre>Loading...</pre>
   }
-
-  //d3.bin tests
-  const innerHeight = height - margin.top - margin.bottom
-  const innerWidth = width - margin.left - margin.right
-
-  const maxValue = new Date(d3.max(vaccinationsData, (d) => d.vaccinationDate))
-  const minValue = new Date(d3.min(vaccinationsData, (d) => d.vaccinationDate))
-
-  const xScale = d3
-    .scaleTime()
-    .domain([minValue, maxValue])
-    .range([0, innerWidth])
-
-  //xScale.ticks(d3.timeDay) gives me all the ticks between min and max values
-  //But the binning is not recognizing them, I wrote a function to create an array of dates. This seems to work.
-
-  const getDaysArray = (start, end) => {
-    let arr = []
-    for (const i = new Date(start); i <= end; i.setDate(i.getDate() + 1)) {
-      arr.push(new Date(i))
-    }
-    return arr
-  }
-
-  const threshold = getDaysArray(minValue, maxValue)
-
-  const bin1 = d3
-    .bin()
-    .value((d) => d.vaccinationDate)
-    .domain([minValue, maxValue])
-    .thresholds(threshold)
-
-  const buckets1 = bin1(vaccinationsData)
-
-  const yValue = (d) => d.length
-
-  const yScale = d3
-    .scaleLinear()
-    .domain([d3.max(buckets1, yValue), 0])
-    .range([0, innerHeight])
-    .nice()
 
   const getTotalVaccines = () => {
     let antiqua = { orders: 0, vaccines: 0 }
@@ -99,19 +46,10 @@ const App = () => {
 
   return (
     <div className='App'>
-      <svg width={width} height={height}>
-        <g transform={`translate(${margin.left}, ${margin.top})`}>
-          <AxisBottom xScale={xScale} innerHeight={innerHeight} />
-          <AxisLeft yScale={yScale} />
-          <Marks
-            data={buckets1}
-            yScale={yScale}
-            xScale={xScale}
-            yValue={yValue}
-            innerHeight={innerHeight}
-          />
-        </g>
-      </svg>
+      <VaccinationsWithOverlay
+        vaccinationsData={vaccinationsData}
+        ordersData={ordersData}
+      />
       <div>Total Vaccinations Given: {vaccinationsData.length}</div>
       <div>Total Orders Made: {ordersData.length}</div>
       <div>Total Vaccines Ordered: {totalVaccines.total.vaccines}</div>
