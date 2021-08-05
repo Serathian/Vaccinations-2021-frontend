@@ -1,7 +1,9 @@
+import { timeWeek } from 'd3'
+
 export const AxisBottom = ({ xScale, innerHeight, tickFormat }) => {
   return (
     <>
-      {xScale.ticks().map((tickValue) => (
+      {xScale.ticks(timeWeek.every(1)).map((tickValue) => (
         //We can wrap each tick mark in a group so we can add text. by shift the group to the xScale tick mark we eleminate the need for specifying the x1 and x2 in the line element
         <g
           className='tick'
