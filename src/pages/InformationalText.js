@@ -4,6 +4,16 @@ const InformationalText = ({ vaccinationsData, ordersData }) => {
   if (!vaccinationsData || !ordersData) {
     return <pre>Loading...</pre>
   }
+
+  //TODO: Iterate through vaccines and count how many have been used per order.
+  /* !!This should be done on the backend?!!
+  If this was a database, each order would get a count when vaccines are entered
+  into the system. Maybe keep this data processing on the frontend to show
+  balanced skills.
+  This could be done by going through each vaccine, finding the order
+  and adding a counter and a boolean to the order. then we can filter by the boolean
+  to sum how many are left unused. */
+
   const getTotalVaccines = () => {
     let antiqua = { orders: 0, vaccines: 0 }
     let solarBuddhica = { orders: 0, vaccines: 0 }
