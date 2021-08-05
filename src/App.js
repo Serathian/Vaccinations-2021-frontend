@@ -13,7 +13,6 @@ const App = () => {
     <div className='App'>
       <VaccinationsWithOverlay
         vaccinationsData={vaccinationsData}
-        ordersData={ordersData}
         casesData={casesData}
       />
       <InformationalText
