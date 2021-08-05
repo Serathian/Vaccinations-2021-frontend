@@ -1,12 +1,4 @@
-export const Marks = ({
-  data,
-  yScale,
-  xScale,
-  yValue,
-  xValue,
-  innerHeight,
-  toolTipFormat,
-}) => {
+export const Marks = ({ data, yScale, xScale, yValue, innerHeight }) => {
   return (
     <>
       {data.map((d) => (
