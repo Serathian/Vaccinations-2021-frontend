@@ -17,7 +17,11 @@ export const Lines = ({
           .curve(curveLinear)(data)}
       />
       {data.map((d) => (
-        <circle cx={xScale(xValue(d))} cy={yScale(yValue(d))} r={circleRadius}>
+        <circle
+          cx={xScale(xValue(d))}
+          cy={yScale(yValue(d))}
+          r={circleRadius}
+          key={xValue(d)}>
           <title>
             Date: {xValue(d).toString()}
             {'\n'}
