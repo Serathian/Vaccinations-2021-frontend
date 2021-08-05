@@ -1,5 +1,5 @@
 import './VaccinationsWithOverlay.css'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import * as d3 from 'd3'
 import _ from 'lodash'
 
@@ -8,13 +8,11 @@ import { AxisLeft } from '../components/AxisLeft'
 import { Marks } from '../components/Marks'
 import { Lines } from '../components/Lines'
 
-//Need to get the covid cases data, from minValue and maxValue?
-//Overlay it with a line graph on top of the bars
+import { getDaysArray, getYScaleDomain } from '../utils/graph-helpers'
 
 //TODO: Add filtering and clean code
 
-
-//Variables for the dimensions of the graph 
+//Variables for the dimensions of the graph
 const width = 960
 const height = 500
 const margin = { top: 20, right: 20, bottom: 45, left: 50 }
@@ -26,72 +24,80 @@ const VaccinationsWithOverlay = ({
   ordersData,
   casesData,
 }) => {
-  //Extended view extends the graph to view the effects of the vaccines after data finishes.
-  const [extendedView, setExtendedView] = useState(14)
+  const [extendedView, setExtendedView] = useState(7)
+  const [dateValueMax, setDateValueMax] = useState(new Date())
+  const [dateValueMin, setDateValueMin] = useState(new Date())
 
-  //Null check for data
+  const [vaccinationsFilter, setVaccinationsFilter] = useState('')
+  const [casesFilter, setCasesFilter] = useState('All areas')
+
+  useEffect(() => {
+    if (vaccinationsData) {
+      setDateValueMin(
+        new Date(d3.min(vaccinationsData, (d) => d.vaccinationDate))
+      )
+      const tempXValue = new Date(
+        d3.max(vaccinationsData, (d) => d.vaccinationDate)
+      )
+      setDateValueMax(tempXValue.setDate(tempXValue.getDate() + extendedView))
+    }
+  }, [extendedView, vaccinationsData])
+
+  //Null check data is received
   if (!vaccinationsData || !ordersData || !casesData) {
     return <pre>Loading...</pre>
   }
 
+  //#region Data Parsing Logic
+  const filteredVaccinationsData = !vaccinationsFilter
+    ? vaccinationsData
+    : vaccinationsData.filter(
+        (obj) => obj.sourceBottle.healthCareDistrict === vaccinationsFilter
+      )
 
-  const maxValue = new Date(d3.max(vaccinationsData, (d) => d.vaccinationDate))
-  maxValue.setDate(maxValue.getDate() + extendedView)
-
-  const minValue = new Date(d3.min(vaccinationsData, (d) => d.vaccinationDate))
-
+  console.log(filteredVaccinationsData[0])
   const filteredCasesData = casesData.filter(
     (obj) =>
-      obj.Area === 'All areas' && obj.Time > minValue && obj.Time < maxValue
+      obj.Area === casesFilter &&
+      obj.Time > dateValueMin &&
+      obj.Time < dateValueMax
   )
 
-  const getDaysArray = (start, end) => {
-    let arr = []
-    for (const i = new Date(start); i <= end; i.setDate(i.getDate() + 1)) {
-      arr.push(new Date(i))
-    }
-    return arr
-  }
-  const threshold = getDaysArray(minValue, maxValue)
+  //-- Getting thresholds for the binning
+  const threshold = getDaysArray(dateValueMin, dateValueMax)
 
-  const bin1 = d3
+  const vaccinationBuckets = d3
     .bin()
     .value((d) => d.vaccinationDate)
-    .domain([minValue, maxValue])
-    .thresholds(threshold)
+    .domain([dateValueMin, dateValueMax])
+    .thresholds(threshold)(filteredVaccinationsData)
+  //#endregion
 
-  const buckets1 = bin1(vaccinationsData)
+  //#region Visualization Logic
+  //-- xAxis values
+  const xValueCases = (d) => d.Time
 
   const xScale = d3
     .scaleTime()
-    .domain([minValue, maxValue])
+    .domain([dateValueMin, dateValueMax])
     .range([0, innerWidth])
 
-  const yValue = (d) => d.length
+  //-- yAxis Values
+  const yValueVaccine = (d) => d.length
   const yValueCases = (d) => d.val
 
-  const xValueCases = (d) => d.Time
-
-  const yScaleDomain = () => {
-    const vaccineMax = d3.max(buckets1, yValue)
-    const casesMax = d3.max(filteredCasesData, yValueCases)
-
-    console.log(vaccineMax, casesMax)
-    return vaccineMax > casesMax ? vaccineMax : casesMax
-  }
+  const yScaleDomain = getYScaleDomain(
+    vaccinationBuckets,
+    filteredCasesData,
+    yValueVaccine,
+    yValueCases
+  )
 
   const yScale = d3
     .scaleLinear()
-    .domain([yScaleDomain(), 0])
+    .domain([yScaleDomain, 0])
     .range([0, innerHeight])
     .nice()
-
-  //TODO: I should get new data from the backend of all dates,
-  /* filter the data by the dates i have in the chart,
-    To make it easier i should format the data on the backend
-    so it is in objects of 'region':[{date:'2021-01-21', value:'324'}] */
-
-  console.log(filteredCasesData[0])
 
   return (
     <svg width={width} height={height}>
@@ -99,10 +105,10 @@ const VaccinationsWithOverlay = ({
         <AxisBottom xScale={xScale} innerHeight={innerHeight} />
         <AxisLeft yScale={yScale} innerWidth={innerWidth} />
         <Marks
-          data={buckets1}
+          data={vaccinationBuckets}
           yScale={yScale}
           xScale={xScale}
-          yValue={yValue}
+          yValue={yValueVaccine}
           innerHeight={innerHeight}
         />
         <Lines
