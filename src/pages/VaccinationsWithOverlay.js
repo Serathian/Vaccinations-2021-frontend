@@ -19,7 +19,7 @@ const innerHeight = height - margin.top - margin.bottom
 const innerWidth = width - margin.left - margin.right
 
 const VaccinationsWithOverlay = ({ vaccinationsData, casesData }) => {
-  const [extendedView, setExtendedView] = useState(true)
+  const [extendedView, setExtendedView] = useState(false)
   const handleExtendedView = () => {
     setExtendedView(!extendedView)
   }
@@ -44,7 +44,6 @@ const VaccinationsWithOverlay = ({ vaccinationsData, casesData }) => {
   const [casesFilter, setCasesFilter] = useState(casesFilterOptions[0])
 
   const handleSelectorChange = (e) => {
-    console.log(e.target.value)
     const index = e.target.value
     setFilterSelector(index)
     setVaccinationsFilter(vaccinationsFilterOptions[index])
