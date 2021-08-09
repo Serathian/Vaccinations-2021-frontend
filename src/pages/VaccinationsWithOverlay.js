@@ -12,8 +12,8 @@ import { getDaysArray, getYScaleDomain } from '../utils/graph-helpers'
 //TODO: Add filtering drop down boxes
 
 //Variables for the dimensions of the graph
-const width = 960
-const height = 500
+const width = 600
+const height = 300
 const margin = { top: 20, right: 20, bottom: 45, left: 50 }
 const innerHeight = height - margin.top - margin.bottom
 const innerWidth = width - margin.left - margin.right
